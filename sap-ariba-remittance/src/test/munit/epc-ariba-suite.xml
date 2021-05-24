@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="epc-ariba-suite.xml" />
+	<munit:test name="epc-aribaFlow-test-success" doc:id="a90e57cb-cce6-4136-b47e-c4d15eee3718" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Flow Reference" doc:id="10dff65b-9f37-4cda-b511-329f99ff2448" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="5470eb4b-b317-474c-a30a-d5c85f54d795" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output text/plain --- readUrl('classpath://epcaribaFlowtestsuccess\mock_payload.dwl')]" mediaType="text/plain" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://epcaribaFlowtestsuccess\mock_attributes.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="RemittanceFileName" value="#[output application/java --- readUrl('classpath://epcaribaFlowtestsuccess\mock_variable_.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetailsFileName" value="#[output application/java --- readUrl('classpath://epcaribaFlowtestsuccess\mock_variable_1.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Remittance" value="#[output text/csv --- readUrl('classpath://epcaribaFlowtestsuccess\mock_variable_2.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetails" value="#[output application/csv --- readUrl('classpath://epcaribaFlowtestsuccess\mock_variable_3.dwl')]" mediaType="application/csv" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Archive" doc:id="d1fb8338-3fa1-4a9d-bd94-9b2035f21c69" processor="compression:archive">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="46b4f561-912e-47cf-b1d2-7105a0d0e1de" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/zip --- readUrl('classpath://epcaribaFlowtestsuccess\mock_payload1.dwl')]" mediaType="application/zip" encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="RemittanceFileName" value="#[output application/java --- readUrl('classpath://epcaribaFlowtestsuccess\mock_variable_4.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetailsFileName" value="#[output application/java --- readUrl('classpath://epcaribaFlowtestsuccess\mock_variable_5.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Remittance" value="#[output text/csv --- readUrl('classpath://epcaribaFlowtestsuccess\mock_variable_6.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetails" value="#[output application/csv --- readUrl('classpath://epcaribaFlowtestsuccess\mock_variable_7.dwl')]" mediaType="application/csv" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="100d3b70-8d85-48d3-810b-be7e724079c1" >
+				<munit:payload value="#[output text/csv --- readUrl('classpath://epcaribaFlowtestsuccess\set-event_payload.dwl')]" encoding="UTF-8" mediaType="text/csv" />
+				<munit:attributes value="#[readUrl('classpath://epcaribaFlowtestsuccess\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to epc-aribaFlow" doc:id="f5a597f3-f72f-4967-bc9f-aa40c8c4f1c1" name="epc-aribaFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="83da0d7d-2c2e-45bd-a51f-301f48fc78bf" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import epcaribaFlowtestsuccess::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Set Variable" doc:id="fb90e029-839c-4145-851d-d275814bbbca" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="42027591-593d-4432-8abd-12324aad1d02" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Set Variable" doc:id="7f94ae48-bd38-45d6-b90f-a2be65ac28d1" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="625e5261-8e24-4fff-bde0-26c08e62cc10" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Logger" doc:id="6b88d0bb-0659-4040-a1c3-0511e02caf06" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="c3183bb4-3366-4161-b63b-365f1c84d0b1" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Flow Reference" doc:id="95a731ef-13ef-43d7-a97b-b22d7af050e7" processor="flow-ref" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="5f2dc493-26d8-4f8d-92ee-69630a9d0aeb" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Logger" doc:id="c1f19c65-e0b8-40e5-b786-bffeead84223" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="af184db1-13b6-4cb2-8ca5-84d32e355b30" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Set Payload" doc:id="646df652-febf-4a71-b3ce-4a9a085a3d5a" processor="set-payload" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="fd0ea4aa-28ba-4cde-9a6c-b94ac0bb7007" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Transform Message" doc:id="5b7f7ac2-2bb4-4901-9935-2adabe61534f" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ca4cd3a4-7747-4a81-949e-2e9b7d726abe" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Logger" doc:id="40c5dae0-ac86-4a72-85a1-b96774e48be5" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="18d3b209-e10c-4ecf-bfe0-9181354ca93d" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Logger" doc:id="c8e1d48e-ffc0-4ddb-b499-1abb014e8b51" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="c018a4b8-d700-4694-9770-e85d44b6edc6" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

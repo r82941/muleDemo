@@ -1,0 +1,1 @@
+"/sapdata/upload/Mulesoft/Ariba/Outbound/RemittanceDetails20200622103324.csv"

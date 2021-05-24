@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd 
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="7bde1c03-2b83-4e7c-a329-323d9ba03c76" file="diversey-${env}.properties" />
+	<global-property doc:name="Global Property" doc:id="3ecf4ebe-3975-46be-b5e3-075f0c6d6d01" name="env" value="qa" />
+	<sftp:config name="SEP_SFTP_Config" doc:name="SFTP Config" doc:id="6ce13d14-2660-4f65-9ffd-a6ddee53a911" >
+		<sftp:connection host="${DIV.MULE.SEP.SFTP.HOST}" port="${DIV.MULE.SEP.SFTP.PORT}" username="${DIV.MULE.SEP.SFTP.USER}" password="${DIV.MULE.SEP.SFTP.PASSWORD}" />
+	</sftp:config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="97505014-7310-4476-afd0-cc684743579e" >
+		<http:request-connection host="${DIV.MULE.HTTP.ARIBA.HOST}" port="${DIV.MULE.HTTP.ARIBA.PORT}" protocol="HTTPS">
+			<tls:context >
+				<tls:trust-store password="${DIV.MULE.HTTP.ARIBA.TRUSTSTORE.PASSWORD}" type="jks" path="${DIV.MULE.HTTP.ARIBA.TRUSTSTORE.PATH}" insecure="true"/>
+			</tls:context>
+		</http:request-connection>
+	</http:request-config>
+	<sftp:config name="EPC_SFTP_Config" doc:name="SFTP Config" doc:id="6b9a93a6-1948-4579-989c-e27daabdf7c3" >
+		<sftp:connection host="${DIV.MULE.EPC.SFTP.HOST}" port="${DIV.MULE.EPC.SFTP.PORT}" username="${DIV.MULE.EPC.SFTP.USER}" password="${DIV.MULE.EPC.SFTP.PASSWORD}"/>
+	</sftp:config>
+	<cloudhub:config name="CloudHub_Config" doc:name="CloudHub Config" doc:id="27d491b9-8df3-4ad4-9ed1-3291cb9186d2" >
+		<cloudhub:connection username="divmulesupport" password="MuleDeploy@Prod1" environment="9ea4e9c1-d0ec-41c7-a258-8ea567beac30" />
+	</cloudhub:config>
+	
+</mule>

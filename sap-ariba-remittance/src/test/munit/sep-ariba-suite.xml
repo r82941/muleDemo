@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="sep-ariba-suite.xml" />
+	<munit:test name="sep-readRemittanceDetails-test" doc:id="a61c17fe-59ae-4000-9fa3-95901dffa9e3" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Set Variable" doc:id="d3717027-b6b4-4000-b8b1-b8376780ea22" processor="set-variable">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="a486c08e-fba8-4921-9537-91c95442fedc" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:variables >
+						<munit-tools:variable key="path" value="#[readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_.dwl')]" encoding="UTF-8" />
+						<munit-tools:variable key="ArchivePath" value="#[readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_1.dwl')]" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_2.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetailsFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_3.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Filename" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_4.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Remittance" value="#[output text/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_5.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetails1" value="#[output application/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_6.dwl')]" mediaType="application/csv" encoding="UTF-8" />
+						<munit-tools:variable key="SourcePath" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_7.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Move" doc:id="eac33e1b-6fc8-4a29-8866-75c00e834de2" processor="sftp:move">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="78e667b2-162e-49f0-a8af-fe6949e929f7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_payload.dwl')]" mediaType="application/csv" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://sepreadRemittanceDetailstest\mock_attributes.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="path" value="#[readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_8.dwl')]" encoding="UTF-8" />
+						<munit-tools:variable key="ArchivePath" value="#[readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_9.dwl')]" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_10.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetailsFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_11.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Filename" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_12.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Remittance" value="#[output text/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_13.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetails1" value="#[output application/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_14.dwl')]" mediaType="application/csv" encoding="UTF-8" />
+						<munit-tools:variable key="SourcePath" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_15.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Set Variable" doc:id="d34f58d3-fab1-4d77-b6e2-5a9e977b64ed" processor="set-variable">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="056007c8-ccc7-441a-8388-c45b084c6e63" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:variables >
+						<munit-tools:variable key="RemittanceFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_16.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetailsFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_17.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Filename" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_18.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Remittance" value="#[output text/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_19.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Set Variable" doc:id="1d556bd1-4f1f-486b-a120-cc81d4ac1edd" processor="set-variable">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="44b94539-9245-4a87-aab6-7b67e4a4349f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:variables >
+						<munit-tools:variable key="path" value="#[readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_20.dwl')]" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_21.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetailsFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_22.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Filename" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_23.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Remittance" value="#[output text/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_24.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Set Variable" doc:id="4c4b2237-d82e-4fe8-a334-cd4703825705" processor="set-variable">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="303ed16f-3e13-4153-9e84-47da4f4c529d" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:variables >
+						<munit-tools:variable key="path" value="#[readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_25.dwl')]" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetailsFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_26.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_27.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Filename" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_28.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Remittance" value="#[output text/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_29.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+						<munit-tools:variable key="SourcePath" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_30.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Set Payload" doc:id="4788fe6e-2af4-42f9-9cb6-52c79bc660c9" processor="set-payload">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="49f4f09a-cbe9-4a70-ae35-dd79a88912bb" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_payload1.dwl')]" mediaType="application/csv" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Read" doc:id="a4d520bc-a189-4a5d-8205-e3b0d68dcd3b" processor="sftp:read">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="7b3ff3ef-d061-44ca-871c-3ae5c2b27fc2" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_payload2.dwl')]" mediaType="application/csv" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://sepreadRemittanceDetailstest\mock_attributes1.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="path" value="#[readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_31.dwl')]" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetailsFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_32.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_33.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Filename" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_34.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Remittance" value="#[output text/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_35.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+						<munit-tools:variable key="SourcePath" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_36.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Set Variable" doc:id="8170cd45-ffaf-43e4-8391-e643f6e57928" processor="set-variable">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="0e9dd3b8-dd24-4116-a6e5-7f1794ccf0ee" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:variables >
+						<munit-tools:variable key="path" value="#[readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_37.dwl')]" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_38.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetailsFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_39.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Filename" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_40.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="Remittance" value="#[output text/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_41.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+						<munit-tools:variable key="RemittanceDetails1" value="#[output application/csv --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_42.dwl')]" mediaType="application/csv" encoding="UTF-8" />
+						<munit-tools:variable key="SourcePath" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\mock_variable_43.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="bc513940-9715-4349-9030-906cf2c9ce2f" >
+				<munit:payload value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/java" />
+				<munit:attributes value="#[readUrl('classpath://sepreadRemittanceDetailstest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="RemittanceFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\set-event_variable_.dwl')]" encoding="UTF-8" mediaType="application/java" />
+					<munit:variable key="RemittanceDetailsFileName" value="#[output application/java --- readUrl('classpath://sepreadRemittanceDetailstest\set-event_variable_1.dwl')]" encoding="UTF-8" mediaType="application/java" />
+					<munit:variable key="Remittance" value="#[output text/csv --- readUrl('classpath://sepreadRemittanceDetailstest\set-event_variable_2.dwl')]" encoding="UTF-8" mediaType="text/csv" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sep-readRemittanceDetails" doc:id="0316505e-32f7-4329-a261-c8fd388ec43e" name="sep-readRemittanceDetails"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="a430ee2b-284d-4681-9b68-2a200e8df2c0" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import sepreadRemittanceDetailstest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Logger" doc:id="4574d361-6105-4200-afeb-ad22326054b4" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="f8a748d9-9244-45fb-a884-a1c053384756" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Logger" doc:id="7e64c2e7-f45a-41e2-b204-b6c6e0375404" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="fba16e27-12b0-4051-af28-aec59705667e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Logger" doc:id="d8866b1d-f0ee-4fe8-83a7-8369845a03c4" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="1b3861a1-5302-4e90-b761-cf5248f98a55" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

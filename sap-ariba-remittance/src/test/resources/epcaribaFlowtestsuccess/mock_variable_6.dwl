@@ -1,0 +1,42 @@
+[
+  {
+    "UTF-8": "CanceledDate",
+    "column_1": "CreatedDate",
+    "column_2": "ExternalProcessedState",
+    "column_3": "LookupID",
+    "column_4": "AdjustmentAmount",
+    "column_5": "DiscountAmount",
+    "column_6": "GrossAmount",
+    "column_7": "NetAmount",
+    "column_8": "PaymentDate",
+    "column_9": "PaymentNumber",
+    "column_10": "SupplierLocationContactID",
+    "column_11": "TranscationType",
+    "column_12": "AdjustmentAmountDefaultCurrency",
+    "column_13": "DiscountAmountDefaultCurrency",
+    "column_14": "GrossAmountDefaultCurrency",
+    "column_15": "NetAmountDefaultCurrency",
+    "column_16": "PaymentMethodType",
+    "column_17": "SupplierLocation"
+  },
+  {
+    "UTF-8": "",
+    "column_1": "20200619",
+    "column_2": "0",
+    "column_3": "ARB2000112940128 2020",
+    "column_4": "",
+    "column_5": "          0.00",
+    "column_6": "      17029.11",
+    "column_7": "      17029.11",
+    "column_8": "20200619",
+    "column_9": "2000112940",
+    "column_10": "SEP+0000628024",
+    "column_11": "2",
+    "column_12": "USD",
+    "column_13": "USD",
+    "column_14": "USD",
+    "column_15": "USD",
+    "column_16": "ach",
+    "column_17": "SEP+0000628024"
+  }
+]
