@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub"
+	xmlns:compression="http://www.mulesoft.org/schema/mule/compression" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/compression http://www.mulesoft.org/schema/mule/compression/current/mule-compression.xsd
+http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
+	<flow name="epc-aribaFlow" doc:id="043495ae-27c3-4bed-84c3-4c63d88f0570" >
+		<sftp:listener doc:name="On New or Updated File" doc:id="9c6ca9c1-76a2-430c-92c3-52b2c67b44eb" config-ref="EPC_SFTP_Config" directory="${DIV.MULE.EPC.SFTP.PATH}" moveToDirectory="${DIV.MULE.EPC.SFTP.ARCHIVEPATH}" recursive="false">
+			<scheduling-strategy >
+				<cron expression="${DIV.MULE.CRON.EPC.FREQUENCY}" timeZone="${DIV.MULE.CRON.EPC.FREQUENCY.TIMEZONE}" />
+			
+</scheduling-strategy>
+			<sftp:matcher filenamePattern="Remittance2*" timeUnit="SECONDS"/>
+		</sftp:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="c3183bb4-3366-4161-b63b-365f1c84d0b1" message="EPC to Ariba Remittance flow ::- Input message #[payload] with file name :: #[attributes.fileName] and  #[attributes.fileName]  is archived successfully"/>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="625e5261-8e24-4fff-bde0-26c08e62cc10" variableName="Remittance"/>
+		<set-variable value="#[attributes.fileName]" doc:name="Set Variable" doc:id="42027591-593d-4432-8abd-12324aad1d02" variableName="RemittanceFileName"/>
+		<ee:transform doc:name="Transform Message" doc:id="ca4cd3a4-7747-4a81-949e-2e9b7d726abe" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="RemittanceDetailsFileName" ><![CDATA[%dw 2.0
+output application/java
+---
+
+//vars.fileName replace /(\d+)/ with("")
+ "RemittanceDetails" ++ (vars.RemittanceFileName[10 to 27])
+
+
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<set-payload value="#[vars.RemittanceDetailsFileName]" doc:name="Set Payload" doc:id="fd0ea4aa-28ba-4cde-9a6c-b94ac0bb7007" />
+		<logger level="INFO" doc:name="Logger" doc:id="af184db1-13b6-4cb2-8ca5-84d32e355b30" message="Pick #[payload]" />
+		<flow-ref doc:name="Flow Reference" doc:id="5f2dc493-26d8-4f8d-92ee-69630a9d0aeb" name="epc-readRemittanceDetails" target="RemittanceDetails"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c018a4b8-d700-4694-9770-e85d44b6edc6" message="EPC to Ariba Remittance flow :: Success with #[correlationId] and #[vars.RemittanceDetails]"/>
+		<compression:archive doc:name="Archive" doc:id="46b4f561-912e-47cf-b1d2-7105a0d0e1de">
+			<compression:entries ><![CDATA[#[{
+	"Remittance.csv" : vars.Remittance,
+	"RemittanceDetails.csv" : vars.RemittanceDetails
+}]]]></compression:entries>
+			<compression:archiver >
+				<compression:zip-archiver />
+			</compression:archiver>
+		</compression:archive>
+		<flow-ref doc:name="Flow Reference" doc:id="5470eb4b-b317-474c-a30a-d5c85f54d795" name="epc-ariba-httpRequestor"/>
+		<logger level="INFO" doc:name="Logger" doc:id="18d3b209-e10c-4ecf-bfe0-9181354ca93d" message="EPC to Ariba Flow status :: #[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="bf1da4ae-9930-47d6-ae55-bc8d1235f547" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="9dc92366-b1bb-443c-b4fb-026d925adfd5" message="EPC to Ariba Flow Error Alert:: #[vars.RemittanceFileName] &amp; #[vars.RemittanceDetailsFileName] are not processed to Ariba with error message :: #[error.description]" />
+				<cloudhub:create-notification doc:name="Create Notification" doc:id="aee87be3-ac0f-4c9d-9ef6-58ebdfe9be29" config-ref="CloudHub_Config" domain="${DIV.MULE.REMITTANCE.CLOUDHUB.DOMAIN}" priority="ERROR">
+					<cloudhub:message ><![CDATA["EPC to Ariba " ++ p('DIV.MULE.REMITTANCE.CLOUDHUB.MESSAGE')++ " Alert :"]]></cloudhub:message>
+					<cloudhub:custom-properties ><![CDATA[#[output application/java
+---
+{
+	"Remittance" : vars.RemittanceFileName,
+	"Error" : error.description,
+	"RemittanceDetails" : vars.RemittanceDetailsFileName
+}]]]></cloudhub:custom-properties>
+				</cloudhub:create-notification>
+			</on-error-propagate>
+		</error-handler>
+	
+
+</flow>
+	<sub-flow name="epc-ariba-httpRequestor" doc:id="1f44bbff-5345-41d0-be51-1117d4b77bc9">
+		<logger level="INFO" doc:name="Logger" doc:id="e6b8acd4-092d-419d-81ec-bbf668e5fec8" message="Zip file is ready to send to Atiba" />
+		<ee:transform doc:name="Transform Message" doc:id="e9730aa2-bc39-451c-9ab9-3b35fbe1eab9">
+			<ee:message>
+				<ee:set-payload resource="Multipart_Request.dwl" />
+			
+</ee:message>
+			<ee:variables>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4756530e-70f6-4b29-9987-0ea3c89e64f7" message="After Transfor Message :: #[payload]" />
+		<http:request method="POST" doc:name="Request" doc:id="ad7ab10e-c4b2-4516-b831-a6827340198c" path="/${DIV.MULE.HTTP.ARIBA.PATH}" config-ref="HTTP_Request_configuration">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"Content-Type" : "${DIV.MULE.HTTP.ARIBA.CONTENT-TYPE}"
+}]]]></http:headers>
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	"realm" : "${DIV.MULE.HTTP.ARIBA.REALM}"
+}]]]></http:query-params>
+		</http:request>
+		<logger level="DEBUG" doc:name="Response-Logger" doc:id="1e61faee-290e-438c-8e2a-a2bffd888984" message="Completed flow Payload: #[payload] " />
+	</sub-flow>
+	<sub-flow name="epc-readRemittanceDetails" doc:id="99c0cbb5-9631-4b7d-84cc-c33475859fe8" >
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="1a1b0a90-d21c-4e72-a9c2-36d25810c879" variableName="Filename"/>
+		<set-variable value="${DIV.MULE.EPC.SFTP.PATH1}" doc:name="Set Variable" doc:id="79ab35d6-f046-4f3d-bb8c-90728d036285" variableName="path"/>
+		<set-variable value="#[vars.path ++ vars.Filename]" doc:name="Set Variable" doc:id="5d6f353f-6289-4eef-9394-b158ba255241" variableName="SourcePath" />
+		<logger level="INFO" doc:name="Logger" doc:id="24778b85-d00c-46a3-b02e-559895fc7bba" message="Start Reading the file:#[vars.SourcePath]" />
+		<sftp:read doc:name="Read" doc:id="73980f12-967f-4703-9bbd-74d370cdd95f" config-ref="EPC_SFTP_Config" path="#[vars.SourcePath]" outputMimeType="application/csv"/>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="54871dda-f44e-4864-b144-2855cdb7bd2d" variableName="RemittanceDetails1" />
+		<logger level="INFO" doc:name="Logger" doc:id="2de9c265-9af2-4165-b93f-8ebfe2648d5f" message="Print Remittance : #[payload] and file name is #[attributes.fileName]" />
+		<set-variable value="${DIV.MULE.EPC.SFTP.ARCHIVEPATH}" doc:name="Set Variable" doc:id="bd7a3aff-10ff-465b-8afb-dd87f72ba344" variableName="ArchivePath"/>
+		<sftp:move doc:name="Move" doc:id="1e09c45b-31df-41ec-99da-fe10bf269653" config-ref="EPC_SFTP_Config" sourcePath="#[vars.SourcePath]" targetPath="#[vars.ArchivePath]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="316db0c2-d79d-425c-be80-03f7e62fcd73" message="EPC #[attributes.fileName] sucessfully moved to Archive"/>
+		<set-payload value="#[vars.RemittanceDetails1]" doc:name="Set Payload" doc:id="d5f4f72f-b6cb-4e4b-ba96-5efbc81bde3b" />
+	</sub-flow>
+	
+</mule>

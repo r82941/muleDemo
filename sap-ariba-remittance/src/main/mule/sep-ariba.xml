@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub"
+	xmlns:compression="http://www.mulesoft.org/schema/mule/compression" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/compression http://www.mulesoft.org/schema/mule/compression/current/mule-compression.xsd
+http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
+	<flow name="sep-aribaFlow" doc:id="e0a4e862-8787-4bc9-92d8-29fbe9b03e16" >
+		<sftp:listener doc:name="On New or Updated File" doc:id="e4c43bf2-ad64-4d93-9fa9-13f6ad7984a5" config-ref="SEP_SFTP_Config" directory="${DIV.MULE.SEP.SFTP.PATH}" moveToDirectory="${DIV.MULE.SEP.SFTP.ARCHIVEPATH}" recursive="false">
+			<scheduling-strategy >
+				<cron expression="${DIV.MULE.CRON.SEP.FREQUENCY}" timeZone="${DIV.MULE.CRON.SEP.FREQUENCY.TIMEZONE}"/>
+			</scheduling-strategy>
+			<sftp:matcher filenamePattern="Remittance2*" timeUnit="SECONDS"/>
+		</sftp:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="25a55bb1-461e-4838-81a5-438d8111ca55" message="SEP to Ariba Remittance flow ::- Input message #[payload] with file name :: #[attributes.fileName] and  #[attributes.fileName]  is archived successfully"/>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="2c9fd955-0cbd-49e5-83ee-e1f45aa54d2a" variableName="Remittance"/>
+		<set-variable value="#[attributes.fileName]" doc:name="Set Variable" doc:id="c151cf6a-a930-45b4-9e07-c7c5608efa7b" variableName="RemittanceFileName"/>
+		<ee:transform doc:name="Transform Message" doc:id="87c345da-b8ca-444b-9640-ada86e4e6b49" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="RemittanceDetailsFileName" ><![CDATA[%dw 2.0
+output application/java
+---
+
+//vars.fileName replace /(\d+)/ with("")
+ "RemittanceDetails" ++ (vars.RemittanceFileName[10 to 27])
+
+
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<set-payload value="#[vars.RemittanceDetailsFileName]" doc:name="Set Payload" doc:id="88d852d6-c7d7-4ce2-8167-60be28e18ac0" />
+		<logger level="INFO" doc:name="Logger" doc:id="edeb969c-311d-40c4-b310-94ec22d01705" message="Pick #[payload]" />
+		<flow-ref doc:name="Flow Reference" doc:id="159b3f08-820a-4d67-94e3-e48e625e9c21" name="sep-readRemittanceDetails" target="RemittanceDetails"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0bee2dd5-555f-4d22-ae97-5519d7aa72ea" message="SEP to Ariba Remittance flow :: Success with #[correlationId] and #[vars.RemittanceDetails]"/>
+		<compression:archive doc:name="Archive" doc:id="635ddc81-7200-46b5-9217-ae0cc797f77c">
+			<compression:entries ><![CDATA[#[{
+	"Remittance.csv" : vars.Remittance,
+	"RemittanceDetails.csv" : vars.RemittanceDetails
+}]]]></compression:entries>
+			<compression:archiver >
+				<compression:zip-archiver />
+			</compression:archiver>
+		</compression:archive>
+		<flow-ref doc:name="Flow Reference" doc:id="11970d66-3fa4-414f-935e-1f02df6faabf" name="sep-ariba-httpRequestor"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ed06c65c-399e-4e26-8000-58353e74088e" message="SEP to Ariba Flow status :: #[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1ee98108-a39d-4112-a4af-2b3021d5397d" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="c2ecda59-d108-473c-a18e-f20a0a58759d" message="SEP to Ariba Flow Error Alert:: #[vars.RemittanceFileName] &amp; #[vars.RemittanceDetailsFileName] are not processed to Ariba with Error message : #[error.description]"/>
+				<!-- <ee:transform doc:name="Transform Message" doc:id="893239bd-2f6f-4cad-a7c5-dafebf51b9c2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var time = (now() - |P1D| ) as String {format: "yyyyMMdd"}
+-&#45;&#45;
+{
+ Alert : "SEP to Ariba " ++ " Alert : Remittance" ++ time ++"*.csv and RemittanceDetails" ++ time ++ "*.csv files are not processed to Ariba. Please check the logs and reprocess the files",
+
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform> -->
+				<cloudhub:create-notification doc:name="Create Notification" doc:id="bde57dab-410f-4323-a5c4-028f6f91e353" config-ref="CloudHub_Config" domain="${DIV.MULE.REMITTANCE.CLOUDHUB.DOMAIN}" priority="ERROR">
+					<cloudhub:message ><![CDATA["SEP to Ariba " ++ p('DIV.MULE.REMITTANCE.CLOUDHUB.MESSAGE')++ " Alert :"]]></cloudhub:message>
+					<cloudhub:custom-properties ><![CDATA[#[output application/java
+---
+{
+	"Remittance" : vars.RemittanceFileName,
+	"Error" : error.description,
+	"RemittanceDetails" : vars.RemittanceDetailsFileName
+}]]]></cloudhub:custom-properties>
+				</cloudhub:create-notification>
+			
+</on-error-propagate>
+		</error-handler>
+	
+</flow>
+	<sub-flow name="sep-readRemittanceDetails" doc:id="e44f731b-aa3e-470d-96e9-0c2fa8891c4a" >
+
+	<set-variable value="#[payload]" doc:name="Set Variable" doc:id="056007c8-ccc7-441a-8388-c45b084c6e63" variableName="Filename"/>
+		<set-variable value="${DIV.MULE.SEP.SFTP.PATH1}" doc:name="Set Variable" doc:id="44b94539-9245-4a87-aab6-7b67e4a4349f" variableName="path"/>
+		<set-variable value="#[vars.path ++ vars.Filename]" doc:name="Set Variable" doc:id="303ed16f-3e13-4153-9e84-47da4f4c529d" variableName="SourcePath" />
+		<logger level="INFO" doc:name="Logger" doc:id="1b3861a1-5302-4e90-b761-cf5248f98a55" message="Start Reading the file:#[vars.SourcePath]" />
+		<sftp:read doc:name="Read" doc:id="7b3ff3ef-d061-44ca-871c-3ae5c2b27fc2" config-ref="SEP_SFTP_Config" path="#[vars.SourcePath]" outputMimeType="application/csv"/>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="0e9dd3b8-dd24-4116-a6e5-7f1794ccf0ee" variableName="RemittanceDetails1" />
+		<logger level="INFO" doc:name="Logger" doc:id="f8a748d9-9244-45fb-a884-a1c053384756" message="Print Remittance : #[payload] and file name is #[attributes.fileName]" />
+		<set-variable value="${DIV.MULE.SEP.SFTP.ARCHIVEPATH}" doc:name="Set Variable" doc:id="a486c08e-fba8-4921-9537-91c95442fedc" variableName="ArchivePath"/>
+		<sftp:move doc:name="Move" doc:id="78e667b2-162e-49f0-a8af-fe6949e929f7" config-ref="SEP_SFTP_Config" sourcePath="#[vars.SourcePath]" targetPath="#[vars.ArchivePath]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="fba16e27-12b0-4051-af28-aec59705667e" message="#[attributes.fileName] sucessfully moved to Archive"/>
+		<set-payload value="#[vars.RemittanceDetails1]" doc:name="Set Payload" doc:id="49f4f09a-cbe9-4a70-ae35-dd79a88912bb" />
+	</sub-flow>
+	
+	<sub-flow name="sep-ariba-httpRequestor" doc:id="1a3cd8a1-150e-4078-97ad-bad59c0906a9" >
+	<logger level="INFO" doc:name="Logger" doc:id="8155c99b-6193-4a61-af67-83224c849fff" message="Zip file is ready to send to Atiba" />
+		<ee:transform doc:name="Transform Message" doc:id="c1453220-a467-44ee-ab51-90079c1bfe9e">
+			<ee:message>
+				<ee:set-payload resource="Multipart_Request.dwl" />
+			
+</ee:message>
+			<ee:variables>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="bcdb0db4-254f-4329-8a71-2f5f601c2db4" message="After Transfor Message :: #[payload]" />
+		<http:request method="POST" doc:name="Request" doc:id="39c6fea6-dbf3-4bf6-8e08-e7c0c97661cc" path="/${DIV.MULE.HTTP.ARIBA.PATH}" config-ref="HTTP_Request_configuration">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"Content-Type" : "${DIV.MULE.HTTP.ARIBA.CONTENT-TYPE}"
+}]]]></http:headers>
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	"realm" : "${DIV.MULE.HTTP.ARIBA.REALM}"
+}]]]></http:query-params>
+		</http:request>
+		<logger level="DEBUG" doc:name="Response-Logger" doc:id="34df6655-bf5c-46d1-af2b-7a918e1e1629" message="Completed flow Payload: #[payload] " />
+		</sub-flow>
+	
+</mule>
